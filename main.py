@@ -41,5 +41,42 @@ def assign(values, coordinates, square_value):
     print(values[coordinates[0]][coordinates[1]])
 
 
-def cross_product(A, B):
-    return [(a, b) for a in A for b in B]
+class SudokuHelpUtils:
+    """Helpful utilities used to organise sudoku"""
+
+    def __init__(self):
+        """Create the helper lists"""
+        self.row_list = []
+        self.__get_row_relations()
+        self.column_list = []
+        self.__get_column_relations()
+        self.box_list = []
+        self.__get_box_relations()
+
+    def __cross_product(self, A, B):
+        """Creates the cross product of two given lists."""
+
+        return [(a, b) for a in A for b in B]
+
+    def __get_row_relations(self):
+        """Creates a list containing the coordinates of all the sudoku's rows"""
+        # get rows
+        for i in range(9):
+            self.row_list.append([(row, i) for row in range(9)])
+
+    def __get_column_relations(self):
+        """Creates a list containing the coordinates of all the sudoku's columns"""
+        for i in range(9):
+            self.column_list.append([(i, column) for column in range(9)])
+
+    def __get_box_relations(self):
+        """Creates a list containing the coordinates of all the boxes in a 9x9 sudoku"""
+        for i in [[0, 1, 2], [3, 4, 5], [6, 7, 8]]:
+            for j in [[0, 1, 2], [3, 4, 5], [6, 7, 8]]:
+                self.box_list.append(self.__cross_product(i, j))
+
+    def get_units(self):
+        """Gets each coordinate's related elements from rows, columns and its box, including the coordinate itself."""
+
+    def get_peers(self):
+        """Get each coordinates related elements from rows, columns and its box, excluding the coordinate itself."""
