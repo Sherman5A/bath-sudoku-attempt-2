@@ -29,4 +29,17 @@ def parse_sudoku(sudoku):
         for column in range(9):
             square_value = sudoku[row][column]
             print(row, column, square_value)
+            if square_value in [1, 2, 3, 4, 5, 6, 7, 8, 9] and not assign(values, (row, column), square_value):
+                return False  # We cant assign d to square square_value
+    return values
 
+
+def assign(values, coordinates, square_value):
+    other_values = values[coordinates[0]][coordinates[1]].copy()
+    other_values.remove(square_value)
+    print(other_values)
+    print(values[coordinates[0]][coordinates[1]])
+
+
+def cross_product(A, B):
+    return [(a, b) for a in A for b in B]
