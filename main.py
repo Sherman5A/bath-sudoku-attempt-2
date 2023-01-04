@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 
 
@@ -75,22 +76,41 @@ class SudokuHelpUtils:
     def get_peers(self):
         return self.peer_list
 
+    def to_backtrack_or_not(self, values):
+        for items in values:
+            if items:
+                return items
+        # If the assert function returns false due to breaking a constraint
+        # then some function returns false
+        return False
+
 
 helpful_stuff = SudokuHelpUtils()
 
 
 def display_sudkou(values):
-    print()
-    for i in values:
-        for j in i:
-            print(j)
+    # print(values)
+    if values == False:
+        return np.array([[-1] * 9] * 9)
+
+    values_2 = [[] for _ in range(9)]
+    # print("bob")
+    # print(values_2)
+    for i in range(9):
+
+        for j in range(9):
+            # print(i,j)
+            values_2[i].append(values[i][j][0])
+    # print(values_2)
+    return values_2
+
 
 def parse_sudoku(sudoku):
     values = [[list(range(1, 10)) for _ in range(9)] for _ in range(9)]
     for row in range(9):
         for column in range(9):
             square_value = sudoku[row][column]
-            print(row, column, square_value)
+            # print(row, column, square_value)
             if square_value in [1, 2, 3, 4, 5, 6, 7, 8, 9] and not assign(values, (row, column), square_value):
                 return False  # We cant assign d to square square_value
     return values
@@ -98,30 +118,37 @@ def parse_sudoku(sudoku):
 
 def assign(values, coordinates, square_value):
     other_values = values[coordinates[0]][coordinates[1]].copy()
-    other_values.remove(square_value)
-    print(other_values)
-    print(values[coordinates[0]][coordinates[1]])
+    try:
+        other_values.remove(square_value)
+    except ValueError:
+        return False
+    # print(other_values)
+    # print(values[coordinates[0]][coordinates[1]])
 
     if all(eliminate(values, coordinates, possible_values) for possible_values in other_values):
         return values
     else:
         return False
+    # If a square has only 1 possible value then eliminate that value from its peers
+
+    # If a unit has only one possible place for a value then place it there
 
 
 def eliminate(values, coordinates, square_value):
-    print(values)
+    # print(values)
     if square_value not in values[coordinates[0]][coordinates[1]]:
         return values
-    print(values[coordinates[0]][coordinates[1]])
+    # print(values[coordinates[0]][coordinates[1]])
     values[coordinates[0]][coordinates[1]].remove(square_value)
-    print(values[coordinates[0]][coordinates[1]])
+    # print(values[coordinates[0]][coordinates[1]])
 
     # If a square eventually reaches one possible square value then remove it from its peers
     if len(values[coordinates[0]][coordinates[1]]) == 0:
         return False
     elif len(values[coordinates[0]][coordinates[1]]) == 1:
         other_values = values[coordinates[0]][coordinates[1]][0]
-        if not all(eliminate(values, peer_coordinates, other_values) for peer_coordinates in helpful_stuff.get_peers()[coordinates[0]][coordinates[1]]):
+        if not all(eliminate(values, peer_coordinates, other_values) for peer_coordinates in
+                   helpful_stuff.get_peers()[coordinates[0]][coordinates[1]]):
             return False
 
     # If a unit is reduced to only one place then put it there.
@@ -133,3 +160,71 @@ def eliminate(values, coordinates, square_value):
             if not assign(values, dplaces[0], square_value):
                 return False
     return values
+
+
+def search(values):
+    if values is False:
+        print("Values is false")
+        return False
+    if all(len(values[coordinate[0]][coordinate[1]]) == 1 for coordinate in helpful_stuff.squares_list):
+        print("Solved")
+        return values
+    length_coordinate = min(len(values[coordinate[0]][coordinate[1]]) for coordinate in helpful_stuff.squares_list if
+                            len(values[coordinate[0]][coordinate[1]]) > 1)
+    next_coordinate = min(
+        coordinate for coordinate in helpful_stuff.squares_list if len(values[coordinate[0]][coordinate[1]]) > 1)
+    return helpful_stuff.to_backtrack_or_not(
+        search(assign(copy.deepcopy(values), next_coordinate, next_value)) for next_value in
+        values[next_coordinate[0]][next_coordinate[1]])
+
+
+def sudoku_solver(sudoku):
+    def solve(grid):
+        return search(parse_sudoku(grid))
+
+    return display_sudkou(solve(sudoku))
+
+
+SKIP_TESTS = False
+
+
+def tests():
+    import time
+    difficulties = ["very_easy", "easy", "medium", "hard"]
+
+    for difficulty in difficulties:
+        print(f"Testing {difficulty} sudokus")
+
+        sudokus = np.load(f"data/{difficulty}_puzzle.npy")
+        solutions = np.load(f"data/{difficulty}_solution.npy")
+
+        count = 0
+        for i in range(len(sudokus)):
+            sudoku = sudokus[i].copy()
+            print(f"This is {difficulty} sudoku number", i)
+            print(sudoku)
+
+            start_time = time.process_time()
+            your_solution = sudoku_solver(sudoku)
+            end_time = time.process_time()
+
+            print(f"This is your solution for {difficulty} sudoku number", i)
+            print(your_solution)
+
+            print("Is your solution correct?")
+            if np.array_equal(your_solution, solutions[i]):
+                print("Yes! Correct solution.")
+                count += 1
+            else:
+                print("No, the correct solution is:")
+                print(solutions[i])
+
+            print("This sudoku took", end_time - start_time, "seconds to solve.\n")
+
+        print(f"{count}/{len(sudokus)} {difficulty} sudokus correct")
+        if count < len(sudokus):
+            break
+
+
+if not SKIP_TESTS:
+    tests()
