@@ -104,6 +104,12 @@ used due to its simplicity and easy compatibility with the possible values list.
 efficiency of the search, a minimum remaining values heuristic was implemented. Elements with the least
 amount of values are searched first. The search is complete when every length of possible values is 1.
 
+# NumPy:
+
+The NumPy library provided a plethora of useful utilities, especially in list manipulation. Without NumPy and its
+documentation (, large parts of my code would have been significantly longer, especially when dealing with nested lists.
+Furthermore, NumPy aided with the time efficiency of my program due to the libraries use of C code.
+
 # Areas of Improvement:
 
 This implementation uses triply nested lists; therefore, I had to use the deepcopy function from the 
@@ -112,8 +118,8 @@ the search, slowing down my search considerably.
 Using an alternative data structure that does not require such an intensive function to store the 
 Sudoku's possible values could improve the performance of my search.
 
-Furthermore, my code's performance could have been improved by utilising more of numpy. A significant
-portion of numpy's functions use compiled C code. This is far faster than Python's code, improving
+Furthermore, my code's performance could have been improved by utilising more of NumPy. A significant
+portion of NumPy's functions use compiled C code. This is far faster than Python's code, improving
 performance
 
 # Other Attempts:
@@ -123,21 +129,34 @@ the Sudoku's constraints. The algorithm was very effective at solving very easy 
 than my final algorithm; however, the algorithm's speed suffered heavily in the harder puzzles, 
 solving very few of them under 20 seconds.
 
-When researching solutions for this problem, I discovered an algorithm for solving exact cover problems,
+A short attempt was made in implementing a backtracking algorithm using iteration with a minimum remaining values
+heuristics. The attempt successfully solved all the algorithms. However, the implementation took over 120 seconds
+to solve harder algorithms.
+
+When researching solutions for solving the hard Sudokus, I discovered an algorithm for solving exact cover problems,
 such as Sudoku called Algorithm X. However, when researching further into Algorithm X implementations (Assaf, n.d), 
 I found that using the algorithm in Sudoku was very difficult, time-consuming, and hard to understand;
 therefore, the experimentation was halted.
 
+# Learning Outcomes:
+
+This project was a great opportunity to learn about many new concepts, such as:
+- Implementing backtracking and depth-first searches.
+- Developing algorithms to meet times goals.
+- Git branch control
+- Constraint propagation
+- NumPy utilities
+
 # References:
 - IBM, 2022. The constraint propagation algorithm [Online]. Available from: 
-  [https://www.ibm.com/docs/en/icos/22.1.0?topic=constraints-constraint-propagation-algorithm]
-  (https://www.ibm.com/docs/en/icos/22.1.0?topic=constraints-constraint-propagation-algorithm) 
+  <https://www.ibm.com/docs/en/icos/22.1.0?topic=constraints-constraint-propagation-algorithm>
   [Accessed 6 January 2023].
 - IBM, 2022. Backtracking [Online]. Available from: 
-  [https://www.ibm.com/docs/en/icos/22.1.0?topic=goals-backtracking]
-  (https://www.ibm.com/docs/en/icos/22.1.0?topic=goals-backtracking)
+  <https://www.ibm.com/docs/en/icos/22.1.0?topic=goals-backtracking>
   [Accessed 6 January 2023]
 - Assaf Ali, n.d. Algorithm X in 30 lines! [Online]. Available from:
-  [https://www.cs.mcgill.ca/~aassaf9/python/algorithm_x.html]
-  (https://www.cs.mcgill.ca/~aassaf9/python/algorithm_x.html)
+  <https://www.cs.mcgill.ca/~aassaf9/python/algorithm_x.html>
+  [Accessed 6 January 2023]
+- NumPy Developers, n.d. NumPy user guide [Online]. Available form:
+  <https://numpy.org/doc/stable/user/index.html>
   [Accessed 6 January 2023]
