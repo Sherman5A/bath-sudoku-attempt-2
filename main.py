@@ -1,4 +1,5 @@
 import copy
+
 import numpy as np
 
 
@@ -6,7 +7,7 @@ class SudokuHelpUtils:
     """Helpful utilities used to organise sudoku"""
 
     def __init__(self):
-        """Create the helper lists"""
+        """Create the helper lists and populate them"""
         self.squares_list = []
         self.__get_sudoku_elements()
         self.row_list = []
@@ -60,7 +61,8 @@ class SudokuHelpUtils:
         return self.unit_list
 
     def __generate_peers(self):
-        """Get each coordinates related elements from rows, columns and its box, excluding the coordinate itself."""
+        """Get each coordinates related elements from rows, columns and its box, excluding the coordinate itself in a
+           "flat-ish" list"""
         # for s in self.squares_list:
         for s in self.squares_list:
             numpy_edition = np.array(self.get_units()[s[0]][s[1]])
@@ -74,50 +76,39 @@ class SudokuHelpUtils:
         return self.peer_list
 
     def get_peers(self):
+        """Gets the peers"""
         return self.peer_list
 
     def to_backtrack_or_not(self, values):
+        """If the search successfully returns values, continue,
+           otherwise return false"""
         for items in values:
-            if items:
+            if items != False:
                 return items
         # If the assert function returns false due to breaking a constraint
         # then some function returns false
         return False
 
 
-helpful_stuff = SudokuHelpUtils()
+def init_sudoku(sudoku):
+    """Initialises the sudoku values grid and reads the given sudoku into the grid."""
 
-
-def display_sudkou(values):
-    # print(values)
-    if values == False:
-        return np.array([[-1] * 9] * 9)
-
-    values_2 = [[] for _ in range(9)]
-    # print("bob")
-    # print(values_2)
-    for i in range(9):
-
-        for j in range(9):
-            # print(i,j)
-            values_2[i].append(values[i][j][0])
-    # print(values_2)
-    return values_2
-
-
-def parse_sudoku(sudoku):
+    # Create grid 9x9 grid of lists containing the integers 1-9.
     values = [[list(range(1, 10)) for _ in range(9)] for _ in range(9)]
     for row in range(9):
         for column in range(9):
             square_value = sudoku[row][column]
             # print(row, column, square_value)
-            if square_value in [1, 2, 3, 4, 5, 6, 7, 8, 9] and not assign(values, (row, column), square_value):
+            if square_value in [1, 2, 3, 4, 5, 6, 7, 8, 9] and not assign_value(values, (row, column), square_value):
                 return False  # We cant assign d to square square_value
     return values
 
 
-def assign(values, coordinates, square_value):
+def assign_value(values, coordinates, square_value):
     other_values = values[coordinates[0]][coordinates[1]].copy()
+
+    # If value does not exist already in the list, produce error
+    # This prevents double related numbers in the sudoku grid.
     try:
         other_values.remove(square_value)
     except ValueError:
@@ -125,16 +116,15 @@ def assign(values, coordinates, square_value):
     # print(other_values)
     # print(values[coordinates[0]][coordinates[1]])
 
-    if all(eliminate(values, coordinates, possible_values) for possible_values in other_values):
+    # Remove the value from the element and its related elements.
+    if all(remove_related_values(values, coordinates, possible_values) for possible_values in other_values):
         return values
     else:
         return False
-    # If a square has only 1 possible value then eliminate that value from its peers
-
-    # If a unit has only one possible place for a value then place it there
 
 
-def eliminate(values, coordinates, square_value):
+def remove_related_values(values, coordinates, square_value):
+    """"""
     # print(values)
     if square_value not in values[coordinates[0]][coordinates[1]]:
         return values
@@ -142,48 +132,68 @@ def eliminate(values, coordinates, square_value):
     values[coordinates[0]][coordinates[1]].remove(square_value)
     # print(values[coordinates[0]][coordinates[1]])
 
-    # If a square eventually reaches one possible square value then remove it from its peers
+    # If an element eventually reaches one possible square value then remove it from its related elements.
     if len(values[coordinates[0]][coordinates[1]]) == 0:
         return False
     elif len(values[coordinates[0]][coordinates[1]]) == 1:
         other_values = values[coordinates[0]][coordinates[1]][0]
-        if not all(eliminate(values, peer_coordinates, other_values) for peer_coordinates in
-                   helpful_stuff.get_peers()[coordinates[0]][coordinates[1]]):
+        if not all(remove_related_values(values, peer_coordinates, other_values) for peer_coordinates in
+                   sudoku_help_utils.get_peers()[coordinates[0]][coordinates[1]]):
             return False
 
     # If a unit is reduced to only one place then put it there.
-    for u in helpful_stuff.get_units()[coordinates[0]][coordinates[1]]:
-        dplaces = [coordinates for coordinates in u if square_value in values[coordinates[0]][coordinates[1]]]
-        if len(dplaces) == 0:
+    for unit in sudoku_help_utils.get_units()[coordinates[0]][coordinates[1]]:
+        unit_values = [coordinates for coordinates in unit if square_value in values[coordinates[0]][coordinates[1]]]
+        if len(unit_values) == 0:
             return False
-        elif len(dplaces) == 1:
-            if not assign(values, dplaces[0], square_value):
+        elif len(unit_values) == 1:
+            if not assign_value(values, unit_values[0], square_value):
                 return False
     return values
 
 
-def search(values):
+def backtrack_search(values):
     if values is False:
-        print("Values is false")
         return False
-    if all(len(values[coordinate[0]][coordinate[1]]) == 1 for coordinate in helpful_stuff.squares_list):
-        print("Solved")
+
+    if all(len(values[coordinate[0]][coordinate[1]]) == 1 for coordinate in sudoku_help_utils.squares_list):
         return values
-    length_coordinate = min(len(values[coordinate[0]][coordinate[1]]) for coordinate in helpful_stuff.squares_list if
-                            len(values[coordinate[0]][coordinate[1]]) > 1)
+
     next_coordinate = min(
-        coordinate for coordinate in helpful_stuff.squares_list if len(values[coordinate[0]][coordinate[1]]) > 1)
-    return helpful_stuff.to_backtrack_or_not(
-        search(assign(copy.deepcopy(values), next_coordinate, next_value)) for next_value in
+        coordinate for coordinate in sudoku_help_utils.squares_list if len(values[coordinate[0]][coordinate[1]]) > 1)
+
+    return sudoku_help_utils.to_backtrack_or_not(
+        backtrack_search(assign_value(copy.deepcopy(values), next_coordinate, next_value)) for next_value in
         values[next_coordinate[0]][next_coordinate[1]])
 
 
 def sudoku_solver(sudoku):
-    def solve(grid):
-        return search(parse_sudoku(grid))
+    global sudoku_help_utils
+    sudoku_help_utils = SudokuHelpUtils()
 
-    return display_sudkou(solve(sudoku))
+    # Nested functions clear my very messy global namespace :))
+    # Don't complain.
+    def return_sudoku(values):
+        """Return sudoku when solved, or if search failed, return the failure sudoku."""
 
+        # If search fails return 9x9 numpy array of -1s.
+        if values == False:
+            return np.array([[-1] * 9] * 9)
+
+        formatted_values = [[] for _ in range(9)]
+        for i in range(9):
+            for j in range(9):
+                formatted_values[i].append(values[i][j][0])
+        # print(formatted_values)
+        return formatted_values
+
+    def solve(sudoku_grid):
+        return backtrack_search(init_sudoku(sudoku_grid))
+
+    return return_sudoku(solve(sudoku))
+
+
+# **************** Coursework Driver Code ****************
 
 SKIP_TESTS = False
 
@@ -193,6 +203,7 @@ def tests():
     difficulties = ["very_easy", "easy", "medium", "hard"]
 
     for difficulty in difficulties:
+
         print(f"Testing {difficulty} sudokus")
 
         sudokus = np.load(f"data/{difficulty}_puzzle.npy")
