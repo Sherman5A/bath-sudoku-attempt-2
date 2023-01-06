@@ -1,19 +1,35 @@
 # Sudoku Solver:
 
-# Constraint Propogation:
+My implementation to solve Sudokus uses constraint propagation combined with a backtracking search and minimum remaining
+values heuristics.
+
+# Constraint Propagation:
+
+In constraint propagation, when a variable's value is modified, the other related variable's domains are modified
+accordingly, and are examined for any inconsistencies in constraints. This reduces the search's search space (IBM, 2022). 
+However, constraint propagation alone can not solve harder Sudokus. Therefore, a search algorithm will be needed to
+handle the rest of the search.
+
+# Backtracking Algorithm:
+
+Backtracking algorithms solve problems through searching repeatedly for possible solutions. When there is a failure
+in satisfying the problem's constraints, the search reverts (backtracks) and resumes at the most recent point with 
+untested choices (IBM, 2022).
 
 # My Implementation:
 
 ## Overview:
 
 Algorithm:
-- Constraint propogation with backtracking search
+- Constraint propagation with backtracking search
 Heuristics:
-- Minimum remaining value
+- Minimum remaining values
 
 Constraints:
-- No dulpicate values in rows, columns, or 3x3 squares.
+- No duplicate values in rows, columns, or 3x3 squares.
 - Every square must have a value.
+
+## Explanation:
 
 Before starting to solve the Sudoku, my algorithm initialises a 9x9 array in which each element contains
 a list of the digits from 1 to 9. This list represents each element's possible values. To get a list of the possible
@@ -32,8 +48,8 @@ Representation of the Initial Array:
  [[1, 2, 3, 4, 5, 6, 7, 8, 9], [1, 2, 3, 4, 5, 6, ,7 , 8, 9], ... [1, 2, 3, 4, 5, 6, 7, 8, 9]],
 ]
 ```
-We then start to iterate through the elements of the given, partially filled, sudoku. The Sudoku's values are checked; if
-they are not in the digits from 1 to 9 then a failed Sudoku is returned. 
+We then start to iterate through the elements of the given, partially filled, sudoku. The Sudoku's values are checked; 
+if they are not in the digits from 1 to 9 then a failed Sudoku is returned. 
 The element is then passed to a function that checks if it's value is not in the possible values array.
 This prevents Sudokus which are inherently flawed by including a grid such as,
 
@@ -51,10 +67,10 @@ one possible value for an empty square, then it is placed there.
 ```
 9 must be placed in that empty square.
 
-This implementation of constraint propogation is enough to solve simple Sudokus as seen in figure 1. However,
+This implementation of constraint propagation is enough to solve simple Sudokus as seen in figure 1. However,
 it encounters difficulty when dealing with harder Sudokus as possibilities for several values per square are introduced.
 
-Figure 1: very easy sudoku 0
+Figure 1: very easy Sudoku 0
 
 ```
 [[1 0 4 3 8 2 9 5 6]  [[[1], [7], [4], [3], [8], [2], [9], [5], [6]], 
@@ -69,7 +85,7 @@ Figure 1: very easy sudoku 0
  ]                    ]
  ```
 
-Figure 2: hard sudoku number 2
+Figure 2: hard Sudoku number 2
 ```
 [[0 2 0 0 0 6 9 0 0]   [[[1, 4, 5, 7, 8], [2], [1, 3, 4, 5, 7], [1, 7, 8], [1, 7, 8], [6], [9], [3, 4, 5, 7], [1, 3, 4, 5, 8]],                                
  [0 0 0 0 5 0 0 2 0]    [[1, 4, 7, 8], [1, 7, 8, 9], [1, 3, 4, 7], [1, 7, 8], [5], [1, 4, 8, 9], [1, 3, 4, 6, 8], [2], [1, 3, 4, 6, 8]], 
@@ -84,33 +100,44 @@ Figure 2: hard sudoku number 2
 ```
 
 Therefore, a search was added to the program to handle the unsolved elements. A backtracking search was
-used due to its simplicity and easy compatability with the possible values list. To improve the 
-efficiency of the search, elements with the lowest least amount of values were searched first. The 
-search is complete when every length of possible values is 1.
+used due to its simplicity and easy compatibility with the possible values list. To improve the 
+efficiency of the search, a minimum remaining values heuristic was implemented. Elements with the least
+amount of values are searched first. The search is complete when every length of possible values is 1.
 
 # Areas of Improvement:
 
 This implementation uses triply nested lists; therefore, I had to use the deepcopy function from the 
 copy library. This function takes large amounts processing time to complete and is used frequently in 
-the search, slowing dowm my search considerably.
+the search, slowing down my search considerably.
 Using an alternative data structure that does not require such an intensive function to store the 
 Sudoku's possible values could improve the performance of my search.
 
-Furthermore, my code's performance could have been improved by utilising more of numpy. A signifigant
+Furthermore, my code's performance could have been improved by utilising more of numpy. A significant
 portion of numpy's functions use compiled C code. This is far faster than Python's code, improving
 performance
 
 # Other Attempts:
 
 The initial solution for the Sudoku was a backtracking algorithm, lacking heuristics, only satisfying 
-the Sudoku's constraints. The algorithm was very effective at solving very easy to medium, even moreso 
+the Sudoku's constraints. The algorithm was very effective at solving very easy to medium, even more so 
 than my final algorithm; however, the algorithm's speed suffered heavily in the harder puzzles, 
 solving very few of them under 20 seconds.
 
-When researching solutions for this problem, I discovered an algorithm for solving exact cover problems
-like Sudoku called Algorithm X. However, when researching further into Algorithm X, I found that using
-the algorithm in sudoku was very difficult and time consuming; therefore, the experimentation was halted.
+When researching solutions for this problem, I discovered an algorithm for solving exact cover problems,
+such as Sudoku called Algorithm X. However, when researching further into Algorithm X implementations (Assaf, n.d), 
+I found that using the algorithm in Sudoku was very difficult, time-consuming, and hard to understand;
+therefore, the experimentation was halted.
 
 # References:
-
-Citation algorithm X
+- IBM, 2022. The constraint propagation algorithm [Online]. Available from: 
+  [https://www.ibm.com/docs/en/icos/22.1.0?topic=constraints-constraint-propagation-algorithm]
+  (https://www.ibm.com/docs/en/icos/22.1.0?topic=constraints-constraint-propagation-algorithm) 
+  [Accessed 6 January 2023].
+- IBM, 2022. Backtracking [Online]. Available from: 
+  [https://www.ibm.com/docs/en/icos/22.1.0?topic=goals-backtracking]
+  (https://www.ibm.com/docs/en/icos/22.1.0?topic=goals-backtracking)
+  [Accessed 6 January 2023]
+- Assaf Ali, n.d. Algorithm X in 30 lines! [Online]. Available from:
+  [https://www.cs.mcgill.ca/~aassaf9/python/algorithm_x.html]
+  (https://www.cs.mcgill.ca/~aassaf9/python/algorithm_x.html)
+  [Accessed 6 January 2023]
